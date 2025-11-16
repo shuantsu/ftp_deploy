@@ -1,0 +1,25 @@
+# FTP Deploy - Sensitive Files
+.ftprules
+.ftprules.example
+.ftp_cache.json
+
+# Logs
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
