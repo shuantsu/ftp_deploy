@@ -265,11 +265,11 @@ def main():
         description='Automated FTP deployment',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""Usage examples:
-  ftpdeploy                      # Normal deploy
-  ftpdeploy --dry-run            # Shows what would be uploaded
-  ftpdeploy --force              # Forces upload of all files
-  ftpdeploy --init               # Creates .ftprules using template
-  ftpdeploy --open-config-folder # Opens script folder to edit template"""
+  ftp_deploy                      # Normal deploy
+  ftp_deploy --dry-run            # Shows what would be uploaded
+  ftp_deploy --force              # Forces upload of all files
+  ftp_deploy --init               # Creates .ftprules using template
+  ftp_deploy --open-config-folder # Opens script folder to edit template"""
     )
     
     parser.add_argument('--dry-run', action='store_true', help='Shows what would be uploaded without uploading')
@@ -291,7 +291,7 @@ def main():
     # Check if .ftprules exists
     if not os.path.exists('.ftprules'):
         print("Error: .ftprules file not found in current folder.")
-        print("Use 'ftpdeploy --init' to create a configuration file.")
+        print("Use 'ftp_deploy --init' to create a configuration file.")
         return
     
     # Read configuration
@@ -299,7 +299,7 @@ def main():
         config = read_config()
     except FileNotFoundError:
         print("Error: .ftprules file not found.")
-        print("Use 'ftpdeploy --init' to create a configuration file.")
+        print("Use 'ftp_deploy --init' to create a configuration file.")
         return
     except Exception as e:
         print(f"Error reading .ftprules: {e}")
@@ -496,7 +496,7 @@ def main():
         clean_cache()
         
         ftp.quit()
-        print("\nDeploy completed!")
+        print(f"\nDeploy completed to {config['host']}/{config['remote_folder']}!")
         
     except Exception as e:
         print(f"Error: {e}")
