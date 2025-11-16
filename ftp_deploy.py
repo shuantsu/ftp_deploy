@@ -192,7 +192,7 @@ def get_script_dir():
 def create_example_config():
     """Creates default .ftprules.example file in script folder"""
     example_content = """[remote]
-ftp.seuservidor.com.br
+ftp.yourserver.com
 
 [user]
 yourusername
