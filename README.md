@@ -14,6 +14,7 @@
 - [Usage](#usage)
 - [Examples](#examples)
 - [Security Considerations](#security-considerations)
+- [Files Generated](#files-generated)
 - [License](#license)
 
 ### Overview
@@ -131,6 +132,12 @@ ftp_deploy --init
 - **Limit FTP user permissions** to only necessary directories
 - **Regular password rotation** is recommended
 
+### Files Generated
+
+- `.ftprules` - Configuration file (add to .gitignore)
+- `.ftp_cache.json` - Upload cache (add to .gitignore)
+- `.ftprules.example` - Template file in script directory
+
 ### License
 
 This project is open source. Use at your own risk.
@@ -147,6 +154,7 @@ This project is open source. Use at your own risk.
 - [Uso](#uso)
 - [Exemplos](#exemplos)
 - [Considerações de Segurança](#considerações-de-segurança)
+- [Arquivos Gerados](#arquivos-gerados)
 - [Licença](#licença)
 
 ### Visão Geral
@@ -264,14 +272,13 @@ ftp_deploy --init
 - **Limite permissões do usuário FTP** apenas aos diretórios necessários
 - **Rotação regular de senhas** é recomendada
 
+### Arquivos Gerados
+
+- `.ftprules` - Arquivo de configuração (adicione ao .gitignore)
+- `.ftp_cache.json` - Cache de upload (adicione ao .gitignore)
+- `.ftprules.example` - Arquivo template no diretório do script
+
 ### Licença
 
 Este projeto é código aberto. Use por sua conta e risco.
 
----
-
-## Files Generated
-
-- `.ftprules` - Configuration file (add to .gitignore)
-- `.ftp_cache.json` - Upload cache (add to .gitignore)
-- `.ftprules.example` - Template file in script directory
