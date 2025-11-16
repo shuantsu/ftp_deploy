@@ -32,8 +32,8 @@ def read_config():
         'user': config.get('user', [''])[0] if config.get('user') else '',
         'password': config.get('password', [''])[0] if config.get('password') else '',
         'remote_folder': config.get('remote-folder', [''])[0] if config.get('remote-folder') else '',
-        'include': config.get('include', []),
-        'exclude': config.get('exclude', []) or config.get('except', [])
+        'origin': config.get('origin', [''])[0] if config.get('origin') else '',
+        'exclude': config.get('ignore', [])
     }
 
 def should_exclude(filepath, exclude_patterns):
@@ -203,10 +203,10 @@ yourpassword
 [remote-folder]
 www/remotefoldername
 
-[include]
-dist/
+[origin]
+dist
 
-[except]
+[ignore]
 TEMP/
 """
     
@@ -326,37 +326,35 @@ def main():
         files_to_delete = []
         files_to_rename = []
         
-        # Process each included folder/file
-        for include_pattern in config['include']:
-            if os.path.isdir(include_pattern):
-                # Walk through folder recursively
-                for root, dirs, files in os.walk(include_pattern):
-                    for file in files:
-                        local_path = os.path.join(root, file)
-                        
-                        # Check if should exclude
-                        if should_exclude(local_path, config['exclude']):
-                            continue
-                        
-                        # Relative path for FTP
-                        rel_path = os.path.relpath(local_path, include_pattern)
-                        remote_path = rel_path.replace('\\', '/')
-                        
-                        # Check if needs update
-                        local_time = datetime.fromtimestamp(os.path.getmtime(local_path))
-                        
-                        # Check if needs to upload based on local cache
-                        should_upload = should_upload_file(local_path, local_time, args.force)
-                        
-                        if should_upload:
-                            files_to_upload.append((local_path, remote_path))
-            elif os.path.isfile(include_pattern):
-                # It's a specific file
-                local_path = include_pattern
-                remote_path = os.path.basename(include_pattern)
-                
-                if not should_exclude(local_path, config['exclude']):
+        # Check if origin folder exists
+        origin_folder = config['origin']
+        if not origin_folder:
+            print("Error: Origin folder not specified in .ftprules")
+            return
+        
+        if not os.path.isdir(origin_folder):
+            print(f"Error: Origin folder '{origin_folder}' does not exist")
+            return
+        
+        # Process origin folder
+        if True:
+            # Walk through origin folder recursively
+            for root, dirs, files in os.walk(origin_folder):
+                for file in files:
+                    local_path = os.path.join(root, file)
+                    
+                    # Check if should exclude
+                    if should_exclude(local_path, config['exclude']):
+                        continue
+                    
+                    # Relative path for FTP
+                    rel_path = os.path.relpath(local_path, origin_folder)
+                    remote_path = rel_path.replace('\\', '/')
+                    
+                    # Check if needs update
                     local_time = datetime.fromtimestamp(os.path.getmtime(local_path))
+                    
+                    # Check if needs to upload based on local cache
                     should_upload = should_upload_file(local_path, local_time, args.force)
                     
                     if should_upload:
@@ -366,17 +364,12 @@ def main():
         cache = load_cache()
         current_files = set()
         
-        # Collect all current files
-        for include_pattern in config['include']:
-            if os.path.isdir(include_pattern):
-                for root, dirs, files in os.walk(include_pattern):
-                    for file in files:
-                        local_path = os.path.join(root, file)
-                        if not should_exclude(local_path, config['exclude']):
-                            current_files.add(os.path.normpath(local_path))
-            elif os.path.isfile(include_pattern):
-                if not should_exclude(include_pattern, config['exclude']):
-                    current_files.add(os.path.normpath(include_pattern))
+        # Collect all current files from origin folder
+        for root, dirs, files in os.walk(origin_folder):
+            for file in files:
+                local_path = os.path.join(root, file)
+                if not should_exclude(local_path, config['exclude']):
+                    current_files.add(os.path.normpath(local_path))
         
         # Detect renames and removed files
         deleted_files = {}
@@ -396,25 +389,21 @@ def main():
                     # It's a rename!
                     old_file = deleted_files[file_hash]
                     # Calculate old remote path
-                    for include_pattern in config['include']:
-                        if old_file.startswith(os.path.normpath(include_pattern)):
-                            old_remote_path = os.path.relpath(old_file, include_pattern).replace('\\', '/')
-                            files_to_rename.append((old_remote_path, remote_path, local_path))
-                            # Remove from upload and delete lists
-                            files_to_upload.remove((local_path, remote_path))
-                            del deleted_files[file_hash]
-                            break
+                    if old_file.startswith(os.path.normpath(origin_folder)):
+                        old_remote_path = os.path.relpath(old_file, origin_folder).replace('\\', '/')
+                        files_to_rename.append((old_remote_path, remote_path, local_path))
+                        # Remove from upload and delete lists
+                        files_to_upload.remove((local_path, remote_path))
+                        del deleted_files[file_hash]
             except:
                 pass  # If can't calculate hash, keep as normal upload
         
         # Files remaining in deleted_files are actually removed
         for cached_file in deleted_files.values():
-            for include_pattern in config['include']:
-                if cached_file.startswith(os.path.normpath(include_pattern)):
-                    rel_path = os.path.relpath(cached_file, include_pattern)
-                    remote_path = rel_path.replace('\\', '/')
-                    files_to_delete.append((cached_file, remote_path))
-                    break
+            if cached_file.startswith(os.path.normpath(origin_folder)):
+                rel_path = os.path.relpath(cached_file, origin_folder)
+                remote_path = rel_path.replace('\\', '/')
+                files_to_delete.append((cached_file, remote_path))
         
         if not files_to_upload and not files_to_delete and not files_to_rename:
             print("No files need to be updated.")

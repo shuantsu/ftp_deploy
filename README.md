@@ -61,11 +61,10 @@ yourpassword
 [remote-folder]
 www/your-remote-folder
 
-[include]
-dist/
-src/
+[origin]
+dist
 
-[except]
+[ignore]
 TEMP/
 *.log
 node_modules/
@@ -201,11 +200,10 @@ suasenha
 [remote-folder]
 www/sua-pasta-remota
 
-[include]
-dist/
-src/
+[origin]
+dist
 
-[except]
+[ignore]
 TEMP/
 *.log
 node_modules/
